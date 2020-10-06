@@ -14,5 +14,6 @@ class MainActivity : AppCompatActivity() {
 
         binding.model = model
         binding.lifecycleOwner = this
+        binding.amountEt.requestFocus()
     }
 }

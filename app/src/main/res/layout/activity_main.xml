@@ -21,11 +21,22 @@
             android:layout_width="120dp"
             android:layout_height="wrap_content"
             bind:sortCode="@={model.sortCode}" />
-        
+    
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@{model.sortCode}" />
     
+        <com.lesniak.lib.view.AmountInputField
+            android:id="@+id/amount_et"
+            android:layout_width="120dp"
+            android:layout_height="wrap_content"
+            bind:amount="@={model.amount}" />
+    
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@{model.amountString}" />
+
     </LinearLayout>
 </layout>

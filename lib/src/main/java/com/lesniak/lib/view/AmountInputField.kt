@@ -4,6 +4,8 @@ import android.content.Context
 import android.text.Editable
 import android.text.InputFilter
 import android.text.InputType.TYPE_CLASS_NUMBER
+import android.text.InputType.TYPE_NUMBER_FLAG_DECIMAL
+import android.text.Spanned
 import android.text.TextWatcher
 import android.text.method.NumberKeyListener
 import android.util.AttributeSet
@@ -11,37 +13,37 @@ import androidx.databinding.*
 import androidx.databinding.adapters.ListenerUtil
 import com.google.android.material.textfield.TextInputEditText
 import com.lesniak.lib.R
-import com.lesniak.lib.utils.SortCodeFormatter
+import com.lesniak.lib.utils.AmountFormatter
 import com.lesniak.lib.utils.TextWatcherAdapter
+import java.math.BigDecimal
+import java.math.BigDecimal.ZERO
 
 @BindingMethods(
     value = [BindingMethod(
-        type = SortCodeInputField::class,
-        attribute = "sortCode",
-        method = "setSortCode"
+        type = AmountInputField::class,
+        attribute = "amount",
+        method = "setAmount"
     )]
 )
 @InverseBindingMethods(
     value = [InverseBindingMethod(
-        type = SortCodeInputField::class,
-        attribute = "sortCode",
-        event = "sortCodeAttrChanged",
-        method = "getSortCode"
+        type = AmountInputField::class,
+        attribute = "amount",
+        event = "amountAttrChanged",
+        method = "getAmount"
     )]
 )
-class SortCodeInputField @JvmOverloads constructor(
+class AmountInputField @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null
 ) : TextInputEditText(context, attrs) {
 
     private var isInitialized: Boolean = false
-    private var initialValue: String? = null
+    private var initialValue: BigDecimal? = null
 
-
-    // TODO Use get/setText instead of custom property
-    var sortCode: String?
+    var amount: BigDecimal?
         get() {
-            return SortCodeFormatter.stripFormatting(text?.toString(), DELIMITER)
+            return ZERO
         }
         set(newValue) {
 
@@ -50,10 +52,35 @@ class SortCodeInputField @JvmOverloads constructor(
                 return
             }
 
-            if (sortCode != newValue && isInitialized)
+            if (amount != newValue && isInitialized)
                 text?.clear()
-                    .also { append(SortCodeFormatter.stripFormatting(newValue, DELIMITER)) }
+                    .also { append("") }
         }
+
+    private val inputFilter: InputFilter by lazy {
+
+        object : InputFilter {
+            override fun filter(
+                source: CharSequence,
+                start: Int,
+                end: Int,
+                dest: Spanned?,
+                dstart: Int,
+                dend: Int
+            ): CharSequence {
+
+                val current = text?.toString() ?: ""
+
+                if (source == ",") return ""
+                if (source == "." && current.contains('.')) return ""
+                if (source == "-" && current.contains('-')) return ""
+                if (source == "-" && dstart != 0) return ""
+
+                return source
+            }
+
+        }
+    }
 
     private val watcherFormatter: TextWatcher by lazy {
         object : TextWatcherAdapter() {
@@ -61,34 +88,28 @@ class SortCodeInputField @JvmOverloads constructor(
             override fun afterTextChanged(s: Editable?) {
                 s ?: return
 
-                val formattedSortCode =
-                    SortCodeFormatter.getFormattedSortCode(s.toString(), DELIMITER)
-                if (s.toString() == formattedSortCode) return
-                s.replace(0, s.length, formattedSortCode)
+                val formattedAmount =
+                    AmountFormatter.getFormattedAmount(s.toString())
+
+                if (s.toString() == formattedAmount) return
+                s.replace(0, s.length, formattedAmount)
             }
         }
     }
 
     private val keyListener: NumberKeyListener by lazy {
         object : NumberKeyListener() {
-            override fun getInputType(): Int = TYPE_CLASS_NUMBER
-            override fun getAcceptedChars() = "0123456789$DELIMITER".toCharArray()
+            override fun getInputType(): Int = TYPE_CLASS_NUMBER or TYPE_NUMBER_FLAG_DECIMAL
+            override fun getAcceptedChars() = "£0123456789-,.".toCharArray()
         }
-    }
-
-    private val lengthFilter: InputFilter by lazy {
-        InputFilter.LengthFilter(MAX_CHAR)
     }
 
     companion object {
 
-        private const val DELIMITER = "-"
-        private const val MAX_CHAR = 8 // Including delimiters
-
-        @BindingAdapter("sortCodeAttrChanged")
+        @BindingAdapter("amountAttrChanged")
         @JvmStatic
-        fun setSortCodeChanged(
-            field: SortCodeInputField,
+        fun setAttrChangedListener(
+            field: AmountInputField,
             attrChange: InverseBindingListener?
         ) {
 
@@ -107,21 +128,16 @@ class SortCodeInputField @JvmOverloads constructor(
     override fun onAttachedToWindow() {
         super.onAttachedToWindow()
 
-        // TODO Test using the view without binding
-        addTextChangedListener(watcherFormatter)
         setKeyListener(keyListener)
-        filters = listOf(lengthFilter).toTypedArray()
+        filters = listOf(inputFilter).toTypedArray()
+        addTextChangedListener(watcherFormatter)
 
         isInitialized = true
 
         if (initialValue != null) {
-            sortCode = initialValue
+            amount = initialValue
             initialValue = null
         }
-    }
-
-    override fun setText(text: CharSequence?, type: BufferType?) {
-        sortCode = text?.toString()
     }
 
 }
