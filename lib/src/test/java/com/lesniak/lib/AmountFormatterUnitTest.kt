@@ -1,8 +1,11 @@
 package com.lesniak.lib
 
 import com.lesniak.lib.utils.AmountFormatter.getFormattedInput
+import com.lesniak.lib.utils.AmountFormatter.inputToBigDecimal
 import org.junit.Assert.assertTrue
 import org.junit.Test
+import java.math.BigDecimal
+import java.math.BigDecimal.ROUND_HALF_EVEN
 
 class AmountFormatterUnitTest {
 
@@ -32,6 +35,55 @@ class AmountFormatterUnitTest {
 
 
 //        assertTrue("-0.9" == getFormattedInput("-.9"))
+
+    }
+
+    @Test
+    fun convertToBigDecimal_isCorrect() {
+
+        assertTrue(
+            BigDecimal(0).setScale(2, ROUND_HALF_EVEN).compareTo(inputToBigDecimal(".0")) == 0
+        )
+        assertTrue(
+            BigDecimal(10.55).setScale(2, ROUND_HALF_EVEN)
+                .compareTo(inputToBigDecimal("10.55")) == 0
+        )
+        assertTrue(
+            BigDecimal(1000.10).setScale(2, ROUND_HALF_EVEN)
+                .compareTo(inputToBigDecimal("1,000.10")) == 0
+        )
+        assertTrue(
+            BigDecimal(1000.00).setScale(2, ROUND_HALF_EVEN)
+                .compareTo(inputToBigDecimal("1,000.")) == 0
+        )
+        assertTrue(
+            BigDecimal(1000.10).setScale(2, ROUND_HALF_EVEN)
+                .compareTo(inputToBigDecimal("1,000.1")) == 0
+        )
+        assertTrue(
+            BigDecimal(1000.00).setScale(2, ROUND_HALF_EVEN)
+                .compareTo(inputToBigDecimal("1,000")) == 0
+        )
+        assertTrue(
+            BigDecimal(0.01).setScale(2, ROUND_HALF_EVEN).compareTo(inputToBigDecimal("0.01")) == 0
+        )
+        assertTrue(
+            BigDecimal(0).setScale(2, ROUND_HALF_EVEN).compareTo(inputToBigDecimal("aw")) == 0
+        )
+        assertTrue(
+            BigDecimal(0.00).setScale(2, ROUND_HALF_EVEN).compareTo(inputToBigDecimal("0.")) == 0
+        )
+        assertTrue(
+            BigDecimal(0.00).setScale(2, ROUND_HALF_EVEN).compareTo(inputToBigDecimal(".")) == 0
+        )
+        assertTrue(
+            BigDecimal(30.12).setScale(2, ROUND_HALF_EVEN)
+                .compareTo(inputToBigDecimal("0030.1230")) == 0
+        )
+        assertTrue(
+            BigDecimal(30.12).setScale(2, ROUND_HALF_EVEN)
+                .compareTo(inputToBigDecimal("0030.1270")) == 0
+        )
 
     }
 }

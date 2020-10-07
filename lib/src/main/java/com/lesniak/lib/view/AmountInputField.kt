@@ -16,9 +16,10 @@ import androidx.databinding.adapters.ListenerUtil
 import com.google.android.material.textfield.TextInputEditText
 import com.lesniak.lib.R
 import com.lesniak.lib.utils.AmountFormatter
+import com.lesniak.lib.utils.AmountFormatter.DECIMAL_DELIMITER
+import com.lesniak.lib.utils.AmountFormatter.FORMAT_DELIMITER
 import com.lesniak.lib.utils.TextWatcherAdapter
 import java.math.BigDecimal
-import java.math.BigDecimal.ZERO
 
 
 @BindingMethods(
@@ -47,9 +48,7 @@ class AmountInputField @JvmOverloads constructor(
     private var originalLeftPadding: Float = 0f
 
     var amount: BigDecimal?
-        get() {
-            return ZERO
-        }
+        get() = AmountFormatter.inputToBigDecimal(text?.toString())
         set(newValue) {
 
             if (!isInitialized) {
@@ -76,8 +75,8 @@ class AmountInputField @JvmOverloads constructor(
 
                 val current = text?.toString() ?: ""
 
-                if (source == ",") return ""
-                if (source == "." && current.contains('.')) return ""
+                if (source == FORMAT_DELIMITER.toString()) return ""
+                if (source == DECIMAL_DELIMITER.toString() && current.contains(DECIMAL_DELIMITER)) return ""
                 if (source == "-" && current.contains('-')) return ""
                 if (source == "-" && dstart != 0) return ""
 
@@ -105,7 +104,8 @@ class AmountInputField @JvmOverloads constructor(
     private val keyListener: NumberKeyListener by lazy {
         object : NumberKeyListener() {
             override fun getInputType(): Int = TYPE_CLASS_NUMBER or TYPE_NUMBER_FLAG_DECIMAL
-            override fun getAcceptedChars() = "£0123456789-,.".toCharArray()
+            override fun getAcceptedChars() =
+                "${CURRENCY_SYMBOL}0123456789-$FORMAT_DELIMITER$DECIMAL_DELIMITER".toCharArray()
         }
     }
 

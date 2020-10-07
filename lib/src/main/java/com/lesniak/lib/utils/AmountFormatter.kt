@@ -1,5 +1,7 @@
 package com.lesniak.lib.utils
 
+import java.math.BigDecimal
+import java.math.BigDecimal.ZERO
 import java.text.DecimalFormat
 
 object AmountFormatter : InputFormatter {
@@ -7,8 +9,8 @@ object AmountFormatter : InputFormatter {
     private val copy = StringBuilder()
     private val split = mutableListOf<String>()
 
-    private const val FORMAT_DELIMITER = ','
-    private const val DECIMAL_DELIMITER = '.'
+    const val FORMAT_DELIMITER = ','
+    const val DECIMAL_DELIMITER = '.'
 
     private val formatter = DecimalFormat("#$FORMAT_DELIMITER###")
 
@@ -92,5 +94,16 @@ object AmountFormatter : InputFormatter {
 
     override fun stripFormatting(input: String?): String {
         return input?.replace(FORMAT_DELIMITER.toString(), "") ?: ""
+    }
+
+    fun inputToBigDecimal(input: String?): BigDecimal {
+        input ?: return ZERO
+
+        return with(getFormattedInput(input)) {
+            stripFormatting(this)
+                .toBigDecimalOrNull()
+                ?.setScale(2, java.math.RoundingMode.HALF_EVEN) ?: java.math.BigDecimal.ZERO
+        }
+
     }
 }
