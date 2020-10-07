@@ -1,12 +1,18 @@
 package com.lesniak.lib.utils
 
-object AmountFormatter {
+import java.text.DecimalFormat
+
+object AmountFormatter : InputFormatter {
 
     private val copy = StringBuilder()
     private val split = mutableListOf<String>()
 
-    @JvmStatic
-    fun getFormattedAmount(input: String?): String {
+    private const val FORMAT_DELIMITER = ','
+    private const val DECIMAL_DELIMITER = '.'
+
+    private val formatter = DecimalFormat("#$FORMAT_DELIMITER###")
+
+    override fun getFormattedInput(input: String?): String {
         input ?: return ""
 
         copy.clear()
@@ -19,7 +25,7 @@ object AmountFormatter {
          * split[1] = "987"
          */
         split.clear()
-        with(input.split(".")) {
+        with(input.split(DECIMAL_DELIMITER)) {
             split.add(this.getOrElse(0) { "" })
             split.add(this.getOrElse(1) { "" })
         }
@@ -28,7 +34,7 @@ object AmountFormatter {
          * Routine that ensures 2 decimal points.
          * It trimmes the decimal part to contain max 2 characters.
          */
-        val indexOfDecimalPoint = copy.indexOf('.')
+        val indexOfDecimalPoint = copy.indexOf(DECIMAL_DELIMITER)
         if (indexOfDecimalPoint != -1 && split[1].length > 2) {
             val trimmed = copy.substring(0, indexOfDecimalPoint + 3)
             copy.clear().append(trimmed)
@@ -61,27 +67,30 @@ object AmountFormatter {
          * When a decimal point is present at the first position in the input,
          * the leading 0 is added before it
          */
-        if (copy.getOrNull(0) == '.')
-            copy.replace(0, 1, "0.")
-
-//        return copy.toString()
+        if (copy.getOrNull(0) == DECIMAL_DELIMITER)
+            copy.replace(0, 1, "0$DECIMAL_DELIMITER")
 
         return if (copy.isEmpty()) ""
         else {
 
-            val split = copy.split(".")
+            val split = copy.split(DECIMAL_DELIMITER)
 
-//            copy.clear()
-//            copy.append(DecimalFormat("#,###").format(split[0].toDouble()))
-//            copy.append(".")
-//            copy.append(split.getOrElse(1){""}.toDouble())
+            if (split.isNotEmpty() && split[0].length > 3) {
+
+                val wholeFormatted = formatter.format(split[0].toDouble())
+
+                copy.clear()
+                    .append(wholeFormatted)
+                    .append(if (split.size > 1) DECIMAL_DELIMITER else "")
+                    .append(split.getOrElse(1) { "" })
+            }
 
             return copy.toString()
 
         }
     }
 
-    private fun stripFormatting(input: String?): String {
-        return input?.replace(",", "") ?: ""
+    override fun stripFormatting(input: String?): String {
+        return input?.replace(FORMAT_DELIMITER.toString(), "") ?: ""
     }
 }

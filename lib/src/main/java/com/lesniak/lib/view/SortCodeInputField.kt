@@ -12,6 +12,8 @@ import androidx.databinding.adapters.ListenerUtil
 import com.google.android.material.textfield.TextInputEditText
 import com.lesniak.lib.R
 import com.lesniak.lib.utils.SortCodeFormatter
+import com.lesniak.lib.utils.SortCodeFormatter.DELIMITER
+import com.lesniak.lib.utils.SortCodeFormatter.SORT_CODE_MAX_CHAR_INCLUDES_DELIMITER
 import com.lesniak.lib.utils.TextWatcherAdapter
 
 @BindingMethods(
@@ -41,7 +43,7 @@ class SortCodeInputField @JvmOverloads constructor(
     // TODO Use get/setText instead of custom property
     var sortCode: String?
         get() {
-            return SortCodeFormatter.stripFormatting(text?.toString(), DELIMITER)
+            return SortCodeFormatter.stripFormatting(text?.toString())
         }
         set(newValue) {
 
@@ -52,7 +54,7 @@ class SortCodeInputField @JvmOverloads constructor(
 
             if (sortCode != newValue && isInitialized)
                 text?.clear()
-                    .also { append(SortCodeFormatter.stripFormatting(newValue, DELIMITER)) }
+                    .also { append(SortCodeFormatter.stripFormatting(newValue)) }
         }
 
     private val watcherFormatter: TextWatcher by lazy {
@@ -62,7 +64,7 @@ class SortCodeInputField @JvmOverloads constructor(
                 s ?: return
 
                 val formattedSortCode =
-                    SortCodeFormatter.getFormattedSortCode(s.toString(), DELIMITER)
+                    SortCodeFormatter.getFormattedSortCode(s.toString())
                 if (s.toString() == formattedSortCode) return
                 s.replace(0, s.length, formattedSortCode)
             }
@@ -77,13 +79,10 @@ class SortCodeInputField @JvmOverloads constructor(
     }
 
     private val lengthFilter: InputFilter by lazy {
-        InputFilter.LengthFilter(MAX_CHAR)
+        InputFilter.LengthFilter(SORT_CODE_MAX_CHAR_INCLUDES_DELIMITER)
     }
 
     companion object {
-
-        private const val DELIMITER = "-"
-        private const val MAX_CHAR = 8 // Including delimiters
 
         @BindingAdapter("sortCodeAttrChanged")
         @JvmStatic

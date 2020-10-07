@@ -94,7 +94,7 @@ class AmountInputField @JvmOverloads constructor(
                 s ?: return
 
                 val formattedAmount =
-                    AmountFormatter.getFormattedAmount(s.toString())
+                    AmountFormatter.getFormattedInput(s.toString())
 
                 if (s.toString() == formattedAmount) return
                 s.replace(0, s.length, formattedAmount)
