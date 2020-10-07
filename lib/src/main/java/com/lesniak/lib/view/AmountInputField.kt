@@ -10,6 +10,7 @@ import android.text.Spanned
 import android.text.TextWatcher
 import android.text.method.NumberKeyListener
 import android.util.AttributeSet
+import androidx.core.view.updatePadding
 import androidx.databinding.*
 import androidx.databinding.adapters.ListenerUtil
 import com.google.android.material.textfield.TextInputEditText
@@ -42,6 +43,8 @@ class AmountInputField @JvmOverloads constructor(
 
     private var isInitialized: Boolean = false
     private var initialValue: BigDecimal? = null
+
+    private var originalLeftPadding: Float = 0f
 
     var amount: BigDecimal?
         get() {
@@ -144,31 +147,11 @@ class AmountInputField @JvmOverloads constructor(
             amount = initialValue
             initialValue = null
         }
-    }
 
-    private var originalLeftPadding: Float = 0f
-    private var currencySymbolWidth: Float = 0f
+        val currencySymbolWidth = paint.measureText(CURRENCY_SYMBOL)
 
-    override fun onMeasure(
-        widthMeasureSpec: Int,
-        heightMeasureSpec: Int
-    ) {
-        super.onMeasure(widthMeasureSpec, heightMeasureSpec)
-
-        if (originalLeftPadding == 0f) {
-
-            if (currencySymbolWidth == 0f) {
-                currencySymbolWidth = paint.measureText(CURRENCY_SYMBOL)
-            }
-
-            originalLeftPadding = compoundPaddingStart.toFloat()
-            setPadding(
-                (currencySymbolWidth + originalLeftPadding + CURRENCY_SYMBOL_SPACE_END).toInt(),
-                paddingRight,
-                paddingTop,
-                paddingBottom
-            )
-        }
+        originalLeftPadding = compoundPaddingStart.toFloat()
+        updatePadding(left = (currencySymbolWidth + originalLeftPadding + CURRENCY_SYMBOL_SPACE_END).toInt())
     }
 
     override fun onDraw(canvas: Canvas) {
