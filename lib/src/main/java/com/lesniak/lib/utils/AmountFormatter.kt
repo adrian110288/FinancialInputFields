@@ -1,7 +1,5 @@
 package com.lesniak.lib.utils
 
-import java.text.DecimalFormat
-
 object AmountFormatter {
 
     private val copy = StringBuilder()
@@ -73,9 +71,9 @@ object AmountFormatter {
 
             val split = copy.split(".")
 
-            copy.clear()
-            copy.append(DecimalFormat("#,###").format(split[0].toDouble()))
-            copy.append(".")
+//            copy.clear()
+//            copy.append(DecimalFormat("#,###").format(split[0].toDouble()))
+//            copy.append(".")
 //            copy.append(split.getOrElse(1){""}.toDouble())
 
             return copy.toString()

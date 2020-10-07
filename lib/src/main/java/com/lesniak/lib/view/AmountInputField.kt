@@ -1,6 +1,7 @@
 package com.lesniak.lib.view
 
 import android.content.Context
+import android.graphics.Canvas
 import android.text.Editable
 import android.text.InputFilter
 import android.text.InputType.TYPE_CLASS_NUMBER
@@ -17,6 +18,7 @@ import com.lesniak.lib.utils.AmountFormatter
 import com.lesniak.lib.utils.TextWatcherAdapter
 import java.math.BigDecimal
 import java.math.BigDecimal.ZERO
+
 
 @BindingMethods(
     value = [BindingMethod(
@@ -106,6 +108,10 @@ class AmountInputField @JvmOverloads constructor(
 
     companion object {
 
+        //TODO make it variable
+        const val CURRENCY_SYMBOL = "£"
+        const val CURRENCY_SYMBOL_SPACE_END = 8
+
         @BindingAdapter("amountAttrChanged")
         @JvmStatic
         fun setAttrChangedListener(
@@ -138,6 +144,41 @@ class AmountInputField @JvmOverloads constructor(
             amount = initialValue
             initialValue = null
         }
+    }
+
+    private var originalLeftPadding: Float = 0f
+    private var currencySymbolWidth: Float = 0f
+
+    override fun onMeasure(
+        widthMeasureSpec: Int,
+        heightMeasureSpec: Int
+    ) {
+        super.onMeasure(widthMeasureSpec, heightMeasureSpec)
+
+        if (originalLeftPadding == 0f) {
+
+            if (currencySymbolWidth == 0f) {
+                currencySymbolWidth = paint.measureText(CURRENCY_SYMBOL)
+            }
+
+            originalLeftPadding = compoundPaddingStart.toFloat()
+            setPadding(
+                (currencySymbolWidth + originalLeftPadding + CURRENCY_SYMBOL_SPACE_END).toInt(),
+                paddingRight,
+                paddingTop,
+                paddingBottom
+            )
+        }
+    }
+
+    override fun onDraw(canvas: Canvas) {
+        super.onDraw(canvas)
+        canvas.drawText(
+            CURRENCY_SYMBOL,
+            originalLeftPadding,
+            getLineBounds(0, null).toFloat(),
+            paint
+        )
     }
 
 }
