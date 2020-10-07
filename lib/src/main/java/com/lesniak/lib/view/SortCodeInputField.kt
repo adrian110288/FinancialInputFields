@@ -64,7 +64,7 @@ class SortCodeInputField @JvmOverloads constructor(
                 s ?: return
 
                 val formattedSortCode =
-                    SortCodeFormatter.getFormattedSortCode(s.toString())
+                    SortCodeFormatter.getFormattedInput(s.toString())
                 if (s.toString() == formattedSortCode) return
                 s.replace(0, s.length, formattedSortCode)
             }
